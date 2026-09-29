@@ -1,0 +1,90 @@
+{
+  "name": "trailphysics",
+  "version": "0.1.0",
+  "description": "Route geometry and pace physics for cycling, hiking and running: power-based bike speed, DIN/SAC hiking times, Minetti running pace, noise-filtered ascent and max incline, sunrise and sunset.",
+  "keywords": [
+    "cycling",
+    "hiking",
+    "trail-running",
+    "gpx",
+    "route",
+    "elevation",
+    "gradient",
+    "physics",
+    "pace",
+    "eta",
+    "haversine",
+    "geometry",
+    "sunrise",
+    "sunset"
+  ],
+  "license": "Apache-2.0",
+  "author": "Enzo Hilzinger",
+  "homepage": "https://github.com/ehilzinger/trailphysics-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ehilzinger/trailphysics-js.git"
+  },
+  "bugs": "https://github.com/ehilzinger/trailphysics-js/issues",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./earth": {
+      "types": "./earth.d.ts",
+      "default": "./earth.js"
+    },
+    "./geometry": {
+      "types": "./geometry.d.ts",
+      "default": "./geometry.js"
+    },
+    "./elevation": {
+      "types": "./elevation.d.ts",
+      "default": "./elevation.js"
+    },
+    "./rider-physics": {
+      "types": "./rider-physics.d.ts",
+      "default": "./rider-physics.js"
+    },
+    "./foot-pace": {
+      "types": "./foot-pace.d.ts",
+      "default": "./foot-pace.js"
+    },
+    "./sun": {
+      "types": "./sun.d.ts",
+      "default": "./sun.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "earth.js",
+    "earth.d.ts",
+    "geometry.js",
+    "geometry.d.ts",
+    "elevation.js",
+    "elevation.d.ts",
+    "rider-physics.js",
+    "rider-physics.d.ts",
+    "foot-pace.js",
+    "foot-pace.d.ts",
+    "sun.js",
+    "sun.d.ts"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "fixtures": "node test/build-foot-pace-fixtures.mjs && node test/build-shared-fixtures.mjs"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}
