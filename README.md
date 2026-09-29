@@ -29,6 +29,20 @@ Plain ES modules with no dependencies, no DOM and no global state. Runs in
 Node 18+ and every current browser, with TypeScript declarations included.
 Points are `[lat, lng]` in degrees throughout.
 
+## What it computes
+
+![Speed against gradient for a light rider at 260 W and a loaded tourer at 180 W](https://raw.githubusercontent.com/ehilzinger/trailphysics-js/main/images/speed-from-power.png)
+
+Speed for two riders on the same road, gradient by gradient. Below −2% the
+model has the rider stop pedalling and freewheel, which is the step in both
+curves, and descents are capped at 65 km/h.
+
+![Minutes per kilometre against gradient for hiking and trail running](https://raw.githubusercontent.com/ehilzinger/trailphysics-js/main/images/pace-on-foot.png)
+
+Minutes per kilometre on foot: hiking by the DIN 33466 signpost rule,
+trail running by Minetti's cost of running on a slope, never faster downhill
+than 85% of the flat pace.
+
 ## Install
 
 ```bash
@@ -90,6 +104,8 @@ measure, so a caller can tell "no data" from "zero".
 npm install
 npm test
 ```
+
+![How the shared test vectors reach both test suites](https://raw.githubusercontent.com/ehilzinger/trailphysics-js/main/images/shared-vectors.png)
 
 The vectors in `test/fixtures/` (foot pace, rider physics, elevation) are
 the master copies of the numbers both ports are held to: the Swift package
