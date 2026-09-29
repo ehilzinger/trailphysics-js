@@ -1,5 +1,8 @@
 # trailphysics
 
+[![npm](https://img.shields.io/npm/v/trailphysics.svg)](https://www.npmjs.com/package/trailphysics)
+[![license](https://img.shields.io/npm/l/trailphysics.svg)](LICENSE)
+
 Route geometry and pace physics for cycling, hiking and running, in
 JavaScript. It powers the route planning and arrival times in
 [Hatchure](https://hatchure.app), and it has a
