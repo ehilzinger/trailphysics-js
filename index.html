@@ -406,8 +406,11 @@ function hike() {
   $('hClimb').innerHTML = `${hm(climbH * 3600)}<small>h</small>`;
   $('hSacOut').innerHTML = `×${sacF.toFixed(2)}`;
   const big = Math.max(walkH, climbH), small = Math.min(walkH, climbH);
+  // The signpost sum, then the ground and your speed when either changes it.
+  const adjusted = sacF !== 1 || f !== 1;
   $('hFormula').textContent = `${hmWords(big * 3600)} + half of ${hmWords(small * 3600)} = ${hmWords((big + small / 2) * 3600)}` +
-    (sacF !== 1 ? `, × ${sacF.toFixed(2)} for T${sac}` : '') + (f !== 1 ? `, ÷ ${f.toFixed(2)} for your speed` : '') + ` = ${hmWords(sec)}`;
+    (sacF !== 1 ? `, × ${sacF.toFixed(2)} for T${sac}` : '') + (f !== 1 ? `, ÷ ${f.toFixed(2)} for your speed` : '') +
+    (adjusted ? ` = ${hmWords(sec)}` : '');
   const curve = (settings, sacScale) => { const out = []; for (let g = -30; g <= 40.001; g += 0.5) { const rise = Math.abs(g) * 10; out.push([g, TP.footSectionSeconds({ distanceM: 1000, ascentM: g > 0 ? rise : 0, descentM: g < 0 ? rise : 0, sacScale }, 'hiking', settings) / 60]); } return out; };
   chart($('hikeChart'), { xs: { min: -30, max: 40, ticks: [-30, -20, -10, 0, 10, 20, 30, 40] }, series: [curve({ hikeFactor: f }, sac)], ref: (sac !== 1 || f !== 1) ? curve({ hikeFactor: 1 }, 1) : null, xFmt: pct, yFmt: (v, long) => (long ? `${Math.round(v)} min/km` : `${v}`) });
   setCode(

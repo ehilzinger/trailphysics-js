@@ -1,6 +1,6 @@
 {
   "name": "trailphysics",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Route geometry and pace physics for cycling, hiking and running: power-based bike speed, DIN/SAC hiking times, Minetti running pace, noise-filtered ascent and max incline, sunrise and sunset.",
   "keywords": [
     "cycling",
