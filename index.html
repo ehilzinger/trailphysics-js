@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- The playground for the trailphysics package, published to GitHub Pages
+     from this folder (.github/workflows/pages.yml). It imports the package's
+     own ./index.js, so the page always runs the code it sits beside, and it
+     loads nothing from anywhere else: no fonts, no scripts, no analytics.
+     Not part of the npm package (package.json "files"). -->
+<title>trailphysics · how long a ride, hike or run really takes</title>
+<meta name="description" content="Route geometry and pace physics for JavaScript and Swift: power-based bike speed, DIN/SAC hiking times and Minetti running pace, computed live in your browser.">
+<link rel="canonical" href="https://ehilzinger.github.io/trailphysics-js/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="trailphysics: how long a ride, hike or run really takes">
+<meta property="og:description" content="Open-source route physics for JavaScript and Swift, held to the same numbers by 242 shared test vectors. Try it in the browser.">
+<meta property="og:url" content="https://ehilzinger.github.io/trailphysics-js/">
+<meta property="og:image" content="https://ehilzinger.github.io/trailphysics-js/images/speed-from-power.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="color-scheme" content="light dark">
+<style>
+:root {
+  --ground: #eef1ec;
+  --surface: #fbfcf9;
+  --ink: #182024;
+  --ink-2: #414b50;
+  --muted: #5d686e;
+  --rule: #d3d9d1;
+  --grid: #e3e7e1;
+  --accent: #b8621a;
+  --accent-ink: #ffffff;
+  --you: #2a78d6;
+  --ref: #8b9590;
+  --code-bg: #e8ece6;
+  --good: #2f7a4c;
+  --display: "Avenir Next", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #101416; --surface: #171c1f; --ink: #e7ebe6; --ink-2: #c3cbc6; --muted: #9aa5a9;
+    --rule: #2a3236; --grid: #222a2e; --accent: #e79a45; --accent-ink: #1b1206;
+    --you: #4a93ea; --ref: #707b7f; --code-bg: #12171a; --good: #6cc48f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #101416; --surface: #171c1f; --ink: #e7ebe6; --ink-2: #c3cbc6; --muted: #9aa5a9;
+  --rule: #2a3236; --grid: #222a2e; --accent: #e79a45; --accent-ink: #1b1206;
+  --you: #4a93ea; --ref: #707b7f; --code-bg: #12171a; --good: #6cc48f;
+}
+* { box-sizing: border-box; }
+html { background: var(--ground); }
+body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; padding-inline: max(16px, env(safe-area-inset-left)); padding-block: 22px 56px; }
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 28px; }
+a { color: inherit; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; padding-top: 6px; }
+.mark { display: flex; align-items: center; gap: 10px; font: 800 20px/1 var(--display); letter-spacing: -.01em; text-decoration: none; }
+.mark svg { width: 28px; height: 28px; }
+nav.links { display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 14px; }
+nav.links a { text-decoration: none; color: var(--ink-2); }
+nav.links a:hover { color: var(--ink); text-decoration: underline; }
+
+.hero { display: grid; gap: 14px; max-width: 760px; }
+.hero h1 { font: 800 clamp(32px, 6vw, 54px)/1.02 var(--display); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.hero p { margin: 0; font-size: 17px; color: var(--ink-2); max-width: 64ch; }
+.install { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip { display: inline-flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 7px 8px 7px 12px; font: 400 13.5px/1.3 var(--mono); max-width: 100%; }
+.chip code { overflow-wrap: anywhere; }
+.chip .lang { font: 600 11px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+button { font: inherit; cursor: pointer; }
+.copy { font: 600 12px/1 var(--body); border: 1px solid var(--rule); background: transparent; color: var(--ink-2); border-radius: 6px; padding: 6px 9px; }
+.copy:hover { color: var(--ink); border-color: var(--muted); }
+
+.tool { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+.tabs { display: flex; border-bottom: 1px solid var(--rule); padding: 0 8px; gap: 2px; overflow-x: auto; }
+.tabs button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 14px 16px 11px; font: 700 16px/1 var(--display); color: var(--muted); }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tabs .hint { margin-left: auto; align-self: center; font-size: 13px; color: var(--muted); padding: 0 8px; white-space: nowrap; }
+.panel { display: grid; grid-template-columns: 290px minmax(0, 1fr); }
+.panel[hidden] { display: none !important; }
+.controls { padding: 20px; border-right: 1px solid var(--rule); display: grid; gap: 16px; align-content: start; }
+.field { display: grid; gap: 6px; }
+.field label, .field .lbl { display: flex; justify-content: space-between; gap: 8px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+.field output { font: 500 13.5px/1.3 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+select { font: inherit; font-size: 14px; padding: 7px 8px; border-radius: 7px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); width: 100%; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 7px 4px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.note { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+.out { padding: 20px 20px 16px; display: grid; gap: 14px; min-width: 0; }
+.readouts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border: 1px solid var(--rule); border-radius: 10px; }
+.readouts > div { padding: 10px 12px; display: grid; gap: 2px; }
+.readouts > div + div { border-left: 1px solid var(--rule); }
+.readouts .k { font-size: 12px; color: var(--muted); }
+.readouts .v { font: 600 20px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+.readouts .v small { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+.readouts .lead .v { color: var(--you); }
+.formula { font: 400 13px/1.5 var(--mono); color: var(--ink-2); background: var(--code-bg); border-radius: 8px; padding: 9px 12px; overflow-x: auto; white-space: nowrap; }
+
+.chartbox { position: relative; }
+.chartbox svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chartbox .title { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13.5px; color: var(--ink-2); margin-bottom: 6px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); }
+.legend span::before { content: ""; display: inline-block; width: 18px; height: 0; border-top: 3px solid var(--you); vertical-align: middle; margin-right: 6px; }
+.legend span.ref::before { border-top: 2px dashed var(--ref); }
+.ax { font: 400 11.5px var(--mono); fill: var(--muted); }
+.gridl { stroke: var(--grid); stroke-width: 1; }
+.zero { stroke: var(--rule); stroke-width: 1.2; }
+.you { fill: none; stroke: var(--you); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.ref { fill: none; stroke: var(--ref); stroke-width: 1.75; stroke-dasharray: 5 4; }
+.cap { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 3 3; opacity: .6; }
+.cross { stroke: var(--ink-2); stroke-width: 1; }
+.dot { fill: var(--you); stroke: var(--surface); stroke-width: 2; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--surface); font: 500 12.5px/1.4 var(--mono); padding: 6px 9px; border-radius: 6px; white-space: nowrap; transform: translate(-50%, -110%); }
+.loadmsg { font-size: 14px; color: var(--muted); padding: 40px 0; text-align: center; }
+
+.codecard { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; }
+.codehead { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.codehead h2 { font: 700 18px/1.2 var(--display); margin: 0; }
+.codehead .right { display: flex; gap: 8px; align-items: center; }
+.codehead .seg { width: 160px; }
+pre { margin: 0; background: var(--code-bg); border-radius: 9px; padding: 14px 16px; overflow-x: auto; font: 400 13.5px/1.6 var(--mono); color: var(--ink); }
+pre .c { color: var(--muted); }
+
+.ports { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; align-items: center; padding: 6px 2px; }
+.ports h2 { font: 800 24px/1.15 var(--display); margin: 0 0 8px; letter-spacing: -.01em; }
+.ports p { margin: 0; color: var(--ink-2); max-width: 60ch; }
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 2px solid var(--ink); }
+.facts div { padding: 10px 10px 0 0; }
+.facts b { display: block; font: 600 22px/1.2 var(--mono); }
+.facts span { font-size: 12.5px; color: var(--muted); }
+footer { font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px 20px; flex-wrap: wrap; border-top: 1px solid var(--rule); padding-top: 14px; }
+.status { font-size: 12.5px; color: var(--good); min-width: 4em; }
+
+@media (max-width: 800px) {
+  .panel { grid-template-columns: 1fr; }
+  .controls { border-right: 0; border-bottom: 1px solid var(--rule); grid-template-columns: 1fr 1fr; }
+  .readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .readouts > div:nth-child(3) { border-left: 0; }
+  .readouts > div:nth-child(n+3) { border-top: 1px solid var(--rule); }
+  .ports { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) { .controls { grid-template-columns: 1fr; } .tabs .hint { display: none; } }
+@media (prefers-reduced-motion: no-preference) { .tabs button, .seg button, .copy { transition: color .15s, background .15s, border-color .15s; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="./" aria-label="trailphysics">
+      <svg viewBox="0 0 28 28" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="6" fill="var(--ink)"/><g stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round"><path d="M7 20 L11 9"/><path d="M11.5 20 L15.5 9"/><path d="M16 20 L20 9"/></g><circle cx="21" cy="20" r="2.6" fill="var(--accent)"/></svg>
+      trailphysics
+    </a>
+    <nav class="links" aria-label="Project links">
+      <a href="https://github.com/ehilzinger/trailphysics-js">GitHub · JavaScript</a>
+      <a href="https://github.com/ehilzinger/trailphysics-swift">GitHub · Swift</a>
+      <a href="https://www.npmjs.com/package/trailphysics">npm</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="top">
+    <h1>How long a ride, hike or run really takes.</h1>
+    <p>Route geometry and pace physics for JavaScript and Swift, open source and held to the same numbers by 242 shared test vectors. Move the sliders: every figure below is computed live by the library.</p>
+    <div class="install">
+      <span class="chip"><span class="lang">npm</span><code id="installNpm">npm install trailphysics</code><button type="button" class="copy" id="copyNpm" data-copy="installNpm">Copy</button></span>
+      <span class="chip"><span class="lang">SwiftPM</span><code id="installSwift">.package(url: "https://github.com/ehilzinger/trailphysics-swift", from: "0.1.3")</code><button type="button" class="copy" id="copySwift" data-copy="installSwift">Copy</button></span>
+    </div>
+  </section>
+
+  <section class="tool" aria-label="Try it">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-ride" aria-controls="panel-ride" aria-selected="true">Ride</button>
+      <button type="button" role="tab" id="tab-hike" aria-controls="panel-hike" aria-selected="false">Hike</button>
+      <button type="button" role="tab" id="tab-run" aria-controls="panel-run" aria-selected="false">Run</button>
+      <span class="hint">Hover the chart for exact values</span>
+    </div>
+
+    <!-- Ride -->
+    <div class="panel" role="tabpanel" id="panel-ride" aria-labelledby="tab-ride">
+      <div class="controls">
+        <div class="field"><label for="riderKg">Rider <output id="riderKgOut" for="riderKg"></output></label><input type="range" id="riderKg" min="40" max="130" step="1" value="72"></div>
+        <div class="field"><label for="bikeKg">Bike and kit <output id="bikeKgOut" for="bikeKg"></output></label><input type="range" id="bikeKg" min="6" max="40" step="0.5" value="9"></div>
+        <div class="field"><label for="watts">Power at the pedals <output id="wattsOut" for="watts"></output></label><input type="range" id="watts" min="60" max="400" step="5" value="200"></div>
+        <div class="field"><label for="bikeType">Bike</label>
+          <select id="bikeType"><option value="road" selected>Road, on the hoods</option><option value="gravel">Gravel</option><option value="trekking">Trekking, upright</option><option value="mtb">Mountain bike</option></select></div>
+        <div class="field"><label for="surface">Surface</label>
+          <select id="surface"><option value="asphalt" selected>Asphalt</option><option value="gravel">Gravel</option><option value="offroad">Off-road</option></select></div>
+        <p class="note">Dashed: a loaded tourer, 75 + 25 kg at 180 W, for comparison.</p>
+      </div>
+      <div class="out">
+        <div class="readouts" id="rideReadouts">
+          <div class="lead"><span class="k">On the flat</span><span class="v" id="rFlat">–</span></div>
+          <div><span class="k">Up 8%</span><span class="v" id="rUp8">–</span></div>
+          <div><span class="k">10 km at 7%</span><span class="v" id="rClimb">–</span></div>
+          <div><span class="k">Drag area (CdA)</span><span class="v" id="rCda">–</span></div>
+        </div>
+        <div class="chartbox" id="rideChart"><div class="title"><span>Speed against gradient, km/h</span><span class="legend"><span>Your rider</span><span class="ref">Loaded tourer</span></span></div><p class="loadmsg">Loading trailphysics…</p></div>
+        <p class="note">Below −2% the model has the rider freewheel, which is the step in the curve. Descents are capped at 65 km/h.</p>
+      </div>
+    </div>
+
+    <!-- Hike -->
+    <div class="panel" role="tabpanel" id="panel-hike" aria-labelledby="tab-hike" hidden>
+      <div class="controls">
+        <div class="field"><label for="hDist">Distance <output id="hDistOut" for="hDist"></output></label><input type="range" id="hDist" min="1" max="40" step="0.5" value="12"></div>
+        <div class="field"><label for="hUp">Ascent <output id="hUpOut" for="hUp"></output></label><input type="range" id="hUp" min="0" max="2500" step="10" value="800"></div>
+        <div class="field"><label for="hDown">Descent <output id="hDownOut" for="hDown"></output></label><input type="range" id="hDown" min="0" max="2500" step="10" value="800"></div>
+        <div class="field"><label for="hSac">Difficulty (SAC scale)</label>
+          <select id="hSac"><option value="1">T1 · hiking</option><option value="2" selected>T2 · mountain hiking</option><option value="3">T3 · demanding mountain hiking</option><option value="4">T4 · alpine hiking</option><option value="5">T5 · demanding alpine hiking</option><option value="6">T6 · difficult alpine hiking</option></select></div>
+        <div class="field"><label for="hFactor">Your speed vs the signpost <output id="hFactorOut" for="hFactor"></output></label><input type="range" id="hFactor" min="0.5" max="2" step="0.05" value="1"></div>
+      </div>
+      <div class="out">
+        <div class="readouts">
+          <div class="lead"><span class="k">Hiking time</span><span class="v" id="hTime">–</span></div>
+          <div><span class="k">Walking part</span><span class="v" id="hWalk">–</span></div>
+          <div><span class="k">Climbing part</span><span class="v" id="hClimb">–</span></div>
+          <div><span class="k">Ground factor</span><span class="v" id="hSacOut">–</span></div>
+        </div>
+        <div class="formula" id="hFormula">–</div>
+        <div class="chartbox" id="hikeChart"><div class="title"><span>Minutes per kilometre against gradient</span><span class="legend"><span>Your settings</span><span class="ref">T1, signpost pace</span></span></div><p class="loadmsg">Loading trailphysics…</p></div>
+      </div>
+    </div>
+
+    <!-- Run -->
+    <div class="panel" role="tabpanel" id="panel-run" aria-labelledby="tab-run" hidden>
+      <div class="controls">
+        <div class="field"><span class="lbl">Profile</span>
+          <div class="seg" role="group" aria-label="Running profile"><button type="button" id="runTrail" aria-pressed="true">Trail</button><button type="button" id="runRoad" aria-pressed="false">Road</button></div></div>
+        <div class="field"><label for="rPace">Pace on the flat <output id="rPaceOut" for="rPace"></output></label><input type="range" id="rPace" min="180" max="540" step="5" value="420"></div>
+        <p class="note">Dashed: hiking the same ground by the signpost rule, for comparison.</p>
+      </div>
+      <div class="out">
+        <div class="readouts">
+          <div><span class="k">Down 10%</span><span class="v" id="rnDown">–</span></div>
+          <div class="lead"><span class="k">Flat</span><span class="v" id="rnFlat">–</span></div>
+          <div><span class="k">Up 10%</span><span class="v" id="rnUp10">–</span></div>
+          <div><span class="k">Up 25%</span><span class="v" id="rnUp25">–</span></div>
+        </div>
+        <div class="chartbox" id="runChart"><div class="title"><span>Minutes per kilometre against gradient</span><span class="legend"><span>Running</span><span class="ref">Hiking</span></span></div><p class="loadmsg">Loading trailphysics…</p></div>
+        <p class="note">Downhill, running never gets faster than 85% of the flat pace. Past 25% the climb is run or power-hiked, whichever is quicker.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="codecard" aria-labelledby="codeTitle">
+    <div class="codehead">
+      <h2 id="codeTitle">The same call in your code</h2>
+      <div class="right">
+        <div class="seg" role="group" aria-label="Language"><button type="button" id="langJs" aria-pressed="true">JavaScript</button><button type="button" id="langSwift" aria-pressed="false">Swift</button></div>
+        <button type="button" class="copy" id="copyCode">Copy</button>
+        <span class="status" id="copyStatus" role="status" aria-live="polite"></span>
+      </div>
+    </div>
+    <pre><code id="code">Loading…</code></pre>
+  </section>
+
+  <section class="ports" aria-labelledby="portsTitle">
+    <div>
+      <h2 id="portsTitle">Two ports, one set of numbers</h2>
+      <p>The JavaScript package writes the test vectors; the Swift package reads byte-identical copies, and both suites check every one. A phone and a browser give the same person the same time for the same route. <a href="https://github.com/ehilzinger/trailphysics-js#tests">How the vectors work</a>.</p>
+    </div>
+    <div class="facts">
+      <div><b>242</b><span>shared vectors</span></div>
+      <div><b>0.01 s</b><span>tolerance on times</span></div>
+      <div><b>10⁻⁶</b><span>on everything else</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <span><a href="https://github.com/ehilzinger/trailphysics-js/blob/main/LICENSE">Apache-2.0</a> · Enzo Hilzinger</span>
+    <span>The maths behind <a href="https://hatchure.app/?utm_source=trailphysics&amp;utm_medium=site">Hatchure</a>'s arrival times.</span>
+  </footer>
+</div>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+let TP = null;
+try {
+  // The package this page sits in, at the same commit.
+  TP = await import('./index.js');
+} catch (e) {
+  document.querySelectorAll('.loadmsg').forEach((m) => { m.textContent = 'The library did not load. Reload the page to try again.'; });
+}
+
+// ---------- formatting ----------
+const hm = (sec) => { if (!(sec > 0)) return '–'; const m = Math.round(sec / 60); return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`; };
+const hmWords = (sec) => { const m = Math.round(sec / 60); const h = Math.floor(m / 60); return h ? `${h} h ${String(m % 60).padStart(2, '0')}` : `${m} min`; };
+const pace = (secPerKm) => { if (!(secPerKm > 0)) return '–'; const s = Math.round(secPerKm); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+const kmh = (v) => (v == null || !isFinite(v) ? '–' : v.toFixed(1));
+
+// ---------- chart ----------
+function nice(max) {
+  const steps = [1, 2, 2.5, 5, 10];
+  const raw = max / 5, pow = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = steps.map((s) => s * pow).find((s) => s >= raw);
+  return { step, max: Math.ceil(max / step) * step };
+}
+function chart(host, { xs, series, ref, xFmt, yFmt, yLabelUnit, capY, yMax }) {
+  const W = 640, H = 300, m = { l: 44, r: 12, t: 12, b: 34 };
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const all = series.concat(ref ? [ref] : []).flatMap((s) => s.map((p) => p[1])).filter(isFinite);
+  const y = nice(yMax || Math.max(...all) * 1.05);
+  const x0 = xs.min, x1 = xs.max;
+  const sx = (v) => m.l + (v - x0) / (x1 - x0) * pw, sy = (v) => m.t + ph - Math.min(v, y.max) / y.max * ph;
+  const ns = 'http://www.w3.org/2000/svg';
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${host.dataset.label || ''}"><defs><pattern id="hatch-${host.id}" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" style="stroke:var(--you)" stroke-width="1.4" opacity=".22"/></pattern></defs>`;
+  for (let v = 0; v <= y.max + 1e-9; v += y.step) s += `<line class="gridl" x1="${m.l}" x2="${m.l + pw}" y1="${sy(v)}" y2="${sy(v)}"/><text class="ax" x="${m.l - 8}" y="${sy(v) + 4}" text-anchor="end">${yFmt(v)}</text>`;
+  xs.ticks.forEach((t) => { s += `<text class="ax" x="${sx(t)}" y="${H - 12}" text-anchor="middle">${xFmt(t)}</text>`; });
+  s += `<line class="zero" x1="${sx(0)}" x2="${sx(0)}" y1="${m.t}" y2="${m.t + ph}"/>`;
+  if (capY) s += `<line class="cap" x1="${m.l}" x2="${m.l + pw}" y1="${sy(capY)}" y2="${sy(capY)}"/><text class="ax" x="${m.l + pw}" y="${sy(capY) - 6}" text-anchor="end">${capY} km/h cap</text>`;
+  const path = (pts) => pts.filter((p) => isFinite(p[1])).map((p, i) => `${i ? 'L' : 'M'}${sx(p[0]).toFixed(1)},${sy(p[1]).toFixed(1)}`).join('');
+  const main = series[0];
+  s += `<path d="${path(main)}L${sx(main.at(-1)[0])},${sy(0)}L${sx(main[0][0])},${sy(0)}Z" fill="url(#hatch-${host.id})"/>`;
+  if (ref) s += `<path class="ref" d="${path(ref)}"/>`;
+  s += `<path class="you" d="${path(main)}"/>`;
+  s += `<g class="hover" visibility="hidden"><line class="cross" y1="${m.t}" y2="${m.t + ph}"/><circle class="dot" r="5"/></g><rect x="${m.l}" y="${m.t}" width="${pw}" height="${ph}" fill="transparent" class="hit"/></svg>`;
+  host.querySelectorAll('svg, .tip, .loadmsg').forEach((n) => n.remove());
+  host.insertAdjacentHTML('beforeend', s + '<div class="tip" hidden></div>');
+  const svg = host.querySelector('svg'), g = svg.querySelector('.hover'), tip = host.querySelector('.tip');
+  const hit = svg.querySelector('.hit');
+  const show = (ev) => {
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * W;
+    const xv = x0 + Math.max(0, Math.min(1, (px - m.l) / pw)) * (x1 - x0);
+    const p = main.reduce((a, b) => (Math.abs(b[0] - xv) < Math.abs(a[0] - xv) ? b : a));
+    const q = ref ? ref.reduce((a, b) => (Math.abs(b[0] - p[0]) < Math.abs(a[0] - p[0]) ? b : a)) : null;
+    g.setAttribute('visibility', 'visible');
+    g.querySelector('line').setAttribute('x1', sx(p[0])); g.querySelector('line').setAttribute('x2', sx(p[0]));
+    const c = g.querySelector('circle'); c.setAttribute('cx', sx(p[0])); c.setAttribute('cy', sy(p[1]));
+    tip.hidden = false;
+    tip.style.left = `${sx(p[0]) / W * 100}%`; tip.style.top = `${(sy(p[1]) / H) * r.height + 28}px`;
+    tip.textContent = `${xFmt(p[0])}: ${yFmt(p[1], true)}${q ? `  ·  ref ${yFmt(q[1], true)}` : ''}`;
+  };
+  hit.addEventListener('pointermove', show);
+  hit.addEventListener('pointerdown', show);
+  hit.addEventListener('pointerleave', () => { g.setAttribute('visibility', 'hidden'); tip.hidden = true; });
+}
+const pct = (v) => `${v > 0 ? '+' : ''}${Math.round(v)}%`;
+
+// ---------- code panel ----------
+let lang = 'js', active = 'ride', codeText = { js: '', swift: '' };
+function setCode(js, swift) { codeText = { js, swift }; renderCode(); }
+function renderCode() {
+  const text = codeText[lang] || '';
+  $('code').innerHTML = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/(\/\/[^\n]*)/g, '<span class="c">$1</span>');
+}
+
+// ---------- ride ----------
+const TOURER = { riderKg: 75, bikeKg: 25, watts: 180, bikeType: 'trekking', surface: 'asphalt' };
+function ride() {
+  const r = { riderKg: +$('riderKg').value, bikeKg: +$('bikeKg').value, watts: +$('watts').value, bikeType: $('bikeType').value, surface: $('surface').value };
+  $('riderKgOut').textContent = `${r.riderKg} kg`; $('bikeKgOut').textContent = `${r.bikeKg} kg`; $('wattsOut').textContent = `${r.watts} W`;
+  if (!TP) return;
+  const p = TP.normalizeRider(r), t = TP.normalizeRider(TOURER);
+  const at = (params, g) => TP.speedForGradient(g / 100, params) * 3.6;
+  const curve = (params) => { const out = []; for (let g = -12; g <= 15.001; g += 0.25) out.push([g, at(params, g)]); return out; };
+  const flat = at(p, 0), up8 = at(p, 8), up7 = at(p, 7);
+  $('rFlat').innerHTML = `${kmh(flat)}<small>km/h</small>`;
+  $('rUp8').innerHTML = `${kmh(up8)}<small>km/h</small>`;
+  $('rClimb').innerHTML = `${hm(10 / up7 * 3600)}<small>h</small>`;
+  $('rCda').innerHTML = `${p.cda.toFixed(2)}<small>m²</small>`;
+  chart($('rideChart'), { xs: { min: -12, max: 15, ticks: [-12, -8, -4, 0, 4, 8, 12] }, series: [curve(p)], ref: curve(t), xFmt: pct, yFmt: (v, long) => (long ? `${v.toFixed(1)} km/h` : `${v}`), capY: 65, yMax: 70 });
+  setCode(
+`import { normalizeRider, speedForGradient } from 'trailphysics';
+
+const rider = normalizeRider({
+  riderKg: ${r.riderKg}, bikeKg: ${r.bikeKg}, watts: ${r.watts},
+  bikeType: '${r.bikeType}', surface: '${r.surface}'
+});
+
+// Speed in m/s on a steady 8% climb.
+const up8 = speedForGradient(0.08, rider) * 3.6; // ${kmh(up8)} km/h`,
+`import TrailPhysics
+
+let rider = RiderPhysics.Rider(
+    riderKg: ${r.riderKg}, bikeKg: ${r.bikeKg}, watts: ${r.watts},
+    bikeType: "${r.bikeType}", surface: "${r.surface}"
+)
+let params = RiderPhysics.normalize(rider)!
+
+// Speed in m/s on a steady 8% climb.
+let up8 = RiderPhysics.speedForGradientMs(0.08, params: params) * 3.6 // ${kmh(up8)} km/h`);
+}
+
+// ---------- hike ----------
+function hike() {
+  const d = +$('hDist').value, up = +$('hUp').value, down = +$('hDown').value, sac = +$('hSac').value, f = +$('hFactor').value;
+  $('hDistOut').textContent = `${d} km`; $('hUpOut').textContent = `${up} m`; $('hDownOut').textContent = `${down} m`;
+  $('hFactorOut').textContent = f === 1 ? '×1.00, signpost' : `×${f.toFixed(2)}`;
+  if (!TP) return;
+  const sec = TP.footSectionSeconds({ distanceM: d * 1000, ascentM: up, descentM: down, sacScale: sac }, 'hiking', { hikeFactor: f });
+  const walkH = d * 1000 / 4000, climbH = up / 300 + down / 500, sacF = TP.sacHikeFactor(sac);
+  $('hTime').innerHTML = `${hm(sec)}<small>h</small>`;
+  $('hWalk').innerHTML = `${hm(walkH * 3600)}<small>h</small>`;
+  $('hClimb').innerHTML = `${hm(climbH * 3600)}<small>h</small>`;
+  $('hSacOut').innerHTML = `×${sacF.toFixed(2)}`;
+  const big = Math.max(walkH, climbH), small = Math.min(walkH, climbH);
+  $('hFormula').textContent = `${hmWords(big * 3600)} + half of ${hmWords(small * 3600)} = ${hmWords((big + small / 2) * 3600)}` +
+    (sacF !== 1 ? `, × ${sacF.toFixed(2)} for T${sac}` : '') + (f !== 1 ? `, ÷ ${f.toFixed(2)} for your speed` : '') + ` = ${hmWords(sec)}`;
+  const curve = (settings, sacScale) => { const out = []; for (let g = -30; g <= 40.001; g += 0.5) { const rise = Math.abs(g) * 10; out.push([g, TP.footSectionSeconds({ distanceM: 1000, ascentM: g > 0 ? rise : 0, descentM: g < 0 ? rise : 0, sacScale }, 'hiking', settings) / 60]); } return out; };
+  chart($('hikeChart'), { xs: { min: -30, max: 40, ticks: [-30, -20, -10, 0, 10, 20, 30, 40] }, series: [curve({ hikeFactor: f }, sac)], ref: (sac !== 1 || f !== 1) ? curve({ hikeFactor: 1 }, 1) : null, xFmt: pct, yFmt: (v, long) => (long ? `${Math.round(v)} min/km` : `${v}`) });
+  setCode(
+`import { footSectionSeconds } from 'trailphysics';
+
+const seconds = footSectionSeconds(
+  { distanceM: ${d * 1000}, ascentM: ${up}, descentM: ${down}, sacScale: ${sac} },
+  'hiking',
+  { hikeFactor: ${f} }
+); // ${Math.round(sec)} s, ${hmWords(sec)}`,
+`import TrailPhysics
+
+let seconds = FootPace.sectionSeconds(
+    FootPace.Section(distanceM: ${d * 1000}, ascentM: ${up}, descentM: ${down}, sacScale: ${sac}),
+    profile: .hiking,
+    settings: FootPaceSettings(hikeFactor: ${f})
+) // ${Math.round(sec)} s, ${hmWords(sec)}`);
+}
+
+// ---------- run ----------
+let runProfile = 'trailrun';
+function run() {
+  const flatPace = +$('rPace').value;
+  $('rPaceOut').textContent = `${pace(flatPace)} /km`;
+  if (!TP) return;
+  const settings = { runPaceSecPerKm: flatPace };
+  const perKm = (g, prof, s) => { const rise = Math.abs(g) * 10; return TP.footSectionSeconds({ distanceM: 1000, ascentM: g > 0 ? rise : 0, descentM: g < 0 ? rise : 0 }, prof, s); };
+  $('rnDown').innerHTML = `${pace(perKm(-10, runProfile, settings))}<small>/km</small>`;
+  $('rnFlat').innerHTML = `${pace(perKm(0, runProfile, settings))}<small>/km</small>`;
+  $('rnUp10').innerHTML = `${pace(perKm(10, runProfile, settings))}<small>/km</small>`;
+  $('rnUp25').innerHTML = `${pace(perKm(25, runProfile, settings))}<small>/km</small>`;
+  const curve = (prof, s) => { const out = []; for (let g = -30; g <= 40.001; g += 0.5) out.push([g, perKm(g, prof, s) / 60]); return out; };
+  chart($('runChart'), { xs: { min: -30, max: 40, ticks: [-30, -20, -10, 0, 10, 20, 30, 40] }, series: [curve(runProfile, settings)], ref: curve('hiking', {}), xFmt: pct, yFmt: (v, long) => (long ? `${pace(v * 60)} /km` : `${v}`) });
+  const up10 = perKm(10, runProfile, settings);
+  setCode(
+`import { footSectionSeconds } from 'trailphysics';
+
+// One kilometre climbing 100 m, at ${pace(flatPace)} /km on the flat.
+const seconds = footSectionSeconds(
+  { distanceM: 1000, ascentM: 100 },
+  '${runProfile}',
+  { runPaceSecPerKm: ${flatPace} }
+); // ${Math.round(up10)} s, ${pace(up10)} /km`,
+`import TrailPhysics
+
+// One kilometre climbing 100 m, at ${pace(flatPace)} /km on the flat.
+let seconds = FootPace.sectionSeconds(
+    FootPace.Section(distanceM: 1000, ascentM: 100),
+    profile: .${runProfile},
+    settings: FootPaceSettings(runPaceSecPerKm: ${flatPace})
+) // ${Math.round(up10)} s, ${pace(up10)} /km`);
+}
+
+// ---------- wiring ----------
+const render = { ride, hike, run };
+function refresh() { render[active](); }
+['riderKg', 'bikeKg', 'watts', 'bikeType', 'surface'].forEach((id) => $(id).addEventListener('input', ride));
+['hDist', 'hUp', 'hDown', 'hSac', 'hFactor'].forEach((id) => $(id).addEventListener('input', hike));
+$('rPace').addEventListener('input', run);
+[['runTrail', 'trailrun'], ['runRoad', 'roadrun']].forEach(([id, prof]) => $(id).addEventListener('click', () => {
+  runProfile = prof;
+  $('runTrail').setAttribute('aria-pressed', String(prof === 'trailrun'));
+  $('runRoad').setAttribute('aria-pressed', String(prof === 'roadrun'));
+  if (prof === 'roadrun' && +$('rPace').value === 420) $('rPace').value = 360;
+  if (prof === 'trailrun' && +$('rPace').value === 360) $('rPace').value = 420;
+  run();
+}));
+const tabs = ['ride', 'hike', 'run'];
+function select(name) {
+  active = name;
+  tabs.forEach((t) => { $(`tab-${t}`).setAttribute('aria-selected', String(t === name)); $(`panel-${t}`).hidden = t !== name; });
+  try { history.replaceState(null, '', `#${name}`); } catch (e) {}
+  refresh();
+}
+tabs.forEach((t) => $(`tab-${t}`).addEventListener('click', () => select(t)));
+$('langJs').addEventListener('click', () => { lang = 'js'; $('langJs').setAttribute('aria-pressed', 'true'); $('langSwift').setAttribute('aria-pressed', 'false'); renderCode(); });
+$('langSwift').addEventListener('click', () => { lang = 'swift'; $('langSwift').setAttribute('aria-pressed', 'true'); $('langJs').setAttribute('aria-pressed', 'false'); renderCode(); });
+
+async function copyText(text, statusEl) {
+  try { await navigator.clipboard.writeText(text); if (statusEl) statusEl.textContent = 'Copied'; }
+  catch (e) { if (statusEl) statusEl.textContent = 'Select and copy'; const r = document.createRange(); r.selectNodeContents($('code')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+  if (statusEl) setTimeout(() => { statusEl.textContent = ''; }, 2500);
+}
+$('copyCode').addEventListener('click', () => copyText(codeText[lang], $('copyStatus')));
+document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($(b.dataset.copy).textContent); b.textContent = 'Copied'; } catch (e) { b.textContent = 'Select it'; }
+  setTimeout(() => { b.textContent = 'Copy'; }, 2000);
+}));
+
+// Draw every panel once so a switch is instant, then show the one in the hash.
+ride(); hike(); run();
+const start = (location.hash || '').slice(1);
+select(tabs.includes(start) ? start : 'ride');
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 {
   "name": "trailphysics",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Route geometry and pace physics for cycling, hiking and running: power-based bike speed, DIN/SAC hiking times, Minetti running pace, noise-filtered ascent and max incline, sunrise and sunset.",
   "keywords": [
     "cycling",
@@ -20,7 +20,7 @@
   ],
   "license": "Apache-2.0",
   "author": "Enzo Hilzinger",
-  "homepage": "https://github.com/ehilzinger/trailphysics-js#readme",
+  "homepage": "https://ehilzinger.github.io/trailphysics-js/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ehilzinger/trailphysics-js.git"

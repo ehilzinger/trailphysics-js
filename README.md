@@ -1,5 +1,6 @@
 # trailphysics
 
+[![tests](https://github.com/ehilzinger/trailphysics-js/actions/workflows/pages.yml/badge.svg)](https://github.com/ehilzinger/trailphysics-js/actions/workflows/pages.yml)
 [![npm](https://img.shields.io/npm/v/trailphysics.svg)](https://www.npmjs.com/package/trailphysics)
 [![license](https://img.shields.io/npm/l/trailphysics.svg)](LICENSE)
 
@@ -8,6 +9,10 @@ JavaScript. It powers the route planning and arrival times in
 [Hatchure](https://hatchure.app), and it has a
 [Swift port](https://github.com/ehilzinger/trailphysics-swift) held to the
 same numbers by shared test vectors.
+
+**[Try it in the browser →](https://ehilzinger.github.io/trailphysics-js/)**
+Move the sliders for a rider, a hike or a run, and see the call that
+produces each figure.
 
 - **Rider physics.** Speed comes from power rather than a flat table: air
   drag (with air thinning by altitude), rolling resistance, gravity and
