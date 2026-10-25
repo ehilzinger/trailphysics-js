@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 // The .d.ts files are written by hand. This keeps each one declaring
 // exactly what its module exports at runtime: a name added to a module and
 // not to its declarations, or declared and never exported, fails here.
-var MODULES = ['earth', 'geometry', 'elevation', 'rider-physics', 'foot-pace', 'sun'];
+var MODULES = ['earth', 'geometry', 'elevation', 'rider-physics', 'foot-pace', 'sun', 'cues'];
 
 function declared(name){
   var src = readFileSync(new URL('../' + name + '.d.ts', import.meta.url), 'utf8');

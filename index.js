@@ -7,3 +7,4 @@ export * from './elevation.js';
 export * from './rider-physics.js';
 export * from './foot-pace.js';
 export * from './sun.js';
+export * from './cues.js';

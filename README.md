@@ -97,10 +97,12 @@ Each module can also be imported on its own: `trailphysics/rider-physics`,
 | `geometry` | `distanceM`, `interpolate`, `bearing`, `bearingDelta`, `cumulativeDistances`, `lengthKm`, `pointAtMetres`, `pointAtFraction`, `fractionAlong` |
 | `earth` | `earthDistanceM` (also takes `{ lat, lng }`), `EARTH_RADIUS_M` |
 | `sun` | `sunTimes`, `sunPosition` |
+| `cues` | turn-by-turn: `parseCues`, `planCues` (which turns to say, merged, with the way ahead and heads-ups for steps, a harder grade, a faint trail), `advanceCueTracker` (when to say each), `cueSport` |
 
 The foot-pace model takes a profile id: `'hiking'`, `'trailrun'` or
 `'roadrun'`. Incline bands take a sport: `'ride'`, `'hike'` or `'run'`.
-Every function answers `null` rather than a guess when there is nothing to
+Cues take a sport, `'foot'`, `'run'`, `'bike'` or `'road'` (`cueSport`
+maps a profile id). Every function answers `null` rather than a guess when there is nothing to
 measure, so a caller can tell "no data" from "zero".
 
 ## Tests
@@ -112,7 +114,7 @@ npm test
 
 ![How the shared test vectors reach both test suites](https://raw.githubusercontent.com/ehilzinger/trailphysics-js/main/images/shared-vectors.png)
 
-The vectors in `test/fixtures/` (foot pace, rider physics, elevation) are
+The vectors in `test/fixtures/` (foot pace, rider physics, elevation, cues) are
 the master copies of the numbers both ports are held to: the Swift package
 reads byte-identical copies and checks every one. `npm run fixtures`
 regenerates them; a change that moves a number there is a change to both
