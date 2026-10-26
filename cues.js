@@ -221,6 +221,7 @@ function step(cue, ways, cumulative, elevations){
   return {
     maneuver: cue.maneuver,
     turnDeg: cue.turnDeg,
+    otherWaysDeg: cue.otherWaysDeg,
     exit: cue.exit,
     name: cue.name,
     ref: cue.ref,
@@ -233,7 +234,8 @@ function step(cue, ways, cumulative, elevations){
 //
 // Each planned cue is one moment: `kind` is `turn`, `waypoint`, `arrive`
 // or `heads_up`; `alongM` where it is, `point` its vertex; the manoeuvre
-// and its words (`maneuver`, `turnDeg`, `exit`, `name`, `ref`); `onto`,
+// and its words (`maneuver`, `turnDeg`, `exit`, `name`, `ref`) with the
+// other ways leaving the junction (`otherWaysDeg`, to draw it); `onto`,
 // the kind of way it leads onto (steps, path, footway, track, cycleway,
 // road), and `slope` (up, down, level), for the cue that has no name, which
 // on foot is most of them; `then`, the manoeuvres merged into it, each with
@@ -290,7 +292,7 @@ export function planCues(cues, ways, cumulative, elevations, sport){
         continue;
       }
       out.push({
-        kind: 'heads_up', alongM: nAlong, point: n.point, maneuver: null, turnDeg: null, exit: null, name: null, ref: null,
+        kind: 'heads_up', alongM: nAlong, point: n.point, maneuver: null, turnDeg: null, otherWaysDeg: null, exit: null, name: null, ref: null,
         onto: ontoFrom(ways, n.point, cumulative), slope: slopeFrom(n.point, cumulative, elevations),
         then: [], notice: n.notice, sacScale: n.notice === 'harder_grade' ? n.sacScale : null
       });

@@ -34,6 +34,8 @@ export interface CueWay {
 export interface CueStep {
   maneuver: CueManeuver;
   turnDeg: number | null;
+  /** The other ways leaving the junction, as turnDeg; null when the router cannot tell. */
+  otherWaysDeg: number[] | null;
   exit: number | null;
   name: string | null;
   ref: string | null;
@@ -49,6 +51,7 @@ export interface PlannedCue {
   point: number;
   maneuver: CueManeuver | null;
   turnDeg: number | null;
+  otherWaysDeg: number[] | null;
   exit: number | null;
   name: string | null;
   ref: string | null;
